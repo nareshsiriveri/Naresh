@@ -7,12 +7,18 @@ pool:
 
 
 steps:
+
 - script: echo K8S Terraform Azure !
   displayName: 'Run a one-line script'
+
 - task: DownloadSecureFile@1
   name: mySecureFile
   inputs:
     secureFile: 'azure_rsa.pub'
+
+- script: |
+    sudo chown root:root $(mySecureFile.secureFilePath)
+    sudo chmod a+r $(mySecureFile.secureFilePath)
 
 - task: TerraformCLI@0
   inputs:
@@ -31,8 +37,6 @@ steps:
   inputs:
     command: 'apply'
     workingDirectory: '$(System.DefaultWorkingDirectory)/configuration/iaac/azure/kubernetes'
-    sudo chown root:root $(mySecureFile.secureFilePath)
-    sudo chmod a+r $(mySecureFile.secureFilePath)
     commandOptions: '-var client_id=$(client_id) -var client_secret=$(client_secret) -var ssh_public_key=$(mySecureFile.secureFilePath)'
     environmentServiceName: 'azure-resource-manager-service-connection'
     
